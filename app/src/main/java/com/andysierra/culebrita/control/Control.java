@@ -8,6 +8,8 @@ import com.andysierra.culebrita.consts.Consts;
 import com.andysierra.culebrita.modelos.Juego;
 import com.andysierra.culebrita.vistas.Tablero;
 
+import java.util.ArrayList;
+
 public class Control implements ViewTreeObserver.OnGlobalLayoutListener,    // Controlar el layout
                                 View.OnTouchListener                        // Controlar el touch
 {

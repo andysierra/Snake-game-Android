@@ -1,12 +1,12 @@
 package com.andysierra.culebrita.vistas;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import com.andysierra.culebrita.R;
 import com.andysierra.culebrita.consts.Consts;
+import com.andysierra.culebrita.modelos.Juego;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -14,7 +14,13 @@ import java.util.Observer;
 public class Tablero <T extends ViewGroup> implements Observer
 {
     private static final String TAG="Tablero";
+    private static int rotacion = 0;
     public GridLayout gridLayout;
+    private int[][] matriz;
+    private ArrayList<int[]> celdasRotables;
+    private Consts.direccion direccionCabeza;
+    private Consts.direccion direccionCola;
+    private Consts.direccion direccionColision;
     public T contenedor;
     private Context context;
     public int cellSize;
@@ -27,6 +33,9 @@ public class Tablero <T extends ViewGroup> implements Observer
         gridLayout = new GridLayout(context);
         gridLayout.setColumnCount(Consts.COLS);
         gridLayout.setRowCount(Consts.FILAS);
+        matriz = null;
+        celdasRotables = null;
+        direccionCabeza = null;
 
         contenedor.addView(gridLayout);
     }
@@ -36,39 +45,169 @@ public class Tablero <T extends ViewGroup> implements Observer
     // UPDATE: Dibuja el tablero de acuerdo a la matriz en Logica
     @Override
     public void update(Observable o, Object arg) {
-        ArrayList<Object> argumentos = (ArrayList<Object>)arg;           // Obtener argumentos
         if(gridLayout.getChildCount()>0) gridLayout.removeAllViews();    // Remover viejas celdas
 
-        // Para cada celda:
-        for(int i=0; i<Consts.FILAS; i++) {
-            for(int j=0; j<Consts.COLS; j++) {
+        if(((int)((Object[])arg)[0]) == Consts.TIEMPO1) {
+            this.matriz             = ((int[][])((Object[])arg)[1]);
+            this.celdasRotables     = ((ArrayList<int[]>)((Object[])arg)[2]);
+            this.direccionCabeza    = ((Consts.direccion)((Object[])arg)[3]);
+            this.direccionCola      = ((Consts.direccion)((Object[])arg)[4]);
+            this.direccionColision  = ((Consts.direccion)((Object[])arg)[5]);
 
-                // Poner una Imageview en el gridLayout
-                ImageView celda = new ImageView(context);
-                gridLayout.addView(celda);
+            ImageView celda;
 
-                // Dibujar celda
-                switch (((int[][])argumentos.get(0))[i][j]) {
-                    case Consts.VACIO1:
-                        celda.setImageDrawable(context.getDrawable(R.drawable.ic_greenie));
-                        break;
-                    case Consts.VACIO2:
-                        celda.setImageDrawable(context.getDrawable(R.drawable.ic_greenie_alt));
-                        break;
-                    case Consts.SERPIENTE_CABEZA:
-                        celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cabeza));
-                        break;
-                    case Consts.SERPIENTE_CABEZA_CRASH:
-                        celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cabeza_crash));
-                        break;
+            // Para cada celda:
+            for(int i=0; i<Consts.FILAS; i++) {
+                for(int j=0; j<Consts.COLS; j++) {
+
+                    // Poner una Imageview en el gridLayout
+                    celda = new ImageView(context);
+                    gridLayout.addView(celda);
+
+                    // Dibujar celda
+                    switch (matriz[i][j]) {
+                        case Consts.VACIO1:
+                            celda.setImageDrawable(context.getDrawable(R.drawable.ic_greenie));
+                            break;
+
+                        case Consts.VACIO2:
+                            celda.setImageDrawable(context.getDrawable(R.drawable.ic_greenie_alt));
+                            break;
+
+                        case Consts.SERPIENTE:
+                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente));
+                            else
+                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_alt));
+                            this.rotarSegmento(i, j, celda);
+                            break;
+
+                        case Consts.SERPIENTE_CABEZA:
+                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cabeza));
+                            else
+                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cabeza_alt));
+                            this.rotarSegmento(celda, true);
+                            break;
+
+                        case Consts.SERPIENTE_COLA:
+                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cola));
+                            else
+                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cola_alt));
+                            this.rotarSegmento(celda, false);
+                            break;
+
+                        case Consts.SERPIENTE_CABEZA_CRASH:
+                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cabeza_crash));
+                            else
+                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cabeza_crash_alt));
+                            this.rotarSegmento(celda, true);
+                            break;
+
+                        case Consts.MANZANA:
+                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                        R.drawable.manzana_up : R.drawable.manzana_down));
+                            else
+                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                        R.drawable.manzana_up_alt : R.drawable.manzana_down_alt));
+                            break;
+                    }
+
+                    // Tamaño de celda (Obtenido desde Control.java)
+                    celda.getLayoutParams().width   = cellSize;
+                    celda.getLayoutParams().height  = cellSize;
                 }
+            }
+            Tablero.rotacion += 180;
+        }
 
-                // Tamaño de celda (Obtenido desde Control.java)
-                celda.getLayoutParams().width   = cellSize;
-                celda.getLayoutParams().height  = cellSize;
+        else if(((int)((Object[])arg)[0]) == Consts.TIEMPO2) {
+
+        }
+
+        else if(((int)((Object[])arg)[0]) == Consts.TIEMPO3) {
+
+        }
+
+        gridLayout.invalidate();
+    }
+
+    private void rotarSegmento(int i, int j, ImageView celda) {
+        for(int k=0; k<celdasRotables.size(); k++) {
+            if(celdasRotables.get(k)[0]==i && celdasRotables.get(k)[1]==j){
+
+
+                // ROTACIÓN DE LA CURVA
+                if(k>0 && celdasRotables.get(k)[2] != celdasRotables.get(k-1)[2]) {
+                    if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                        celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_curva));
+                    else
+                        celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_curva_alt));
+
+                    // Rotar los segmentos intermedios de la serpiente
+                    if(celdasRotables.get(k)[2]==Consts.direccion.ARRIBA.toInt()) {
+                        if(celdasRotables.get(k-1)[2]==Consts.direccion.IZQUIERDA.toInt()) celda.setRotation(180);
+                        else celda.setRotationX(180);
+                    }
+                    if(celdasRotables.get(k)[2]==Consts.direccion.ABAJO.toInt()) {
+                        if(celdasRotables.get(k-1)[2]==Consts.direccion.DERECHA.toInt()) celda.setRotation(0);
+                        else celda.setRotationY(180);
+                    }
+                    if(celdasRotables.get(k)[2]==Consts.direccion.DERECHA.toInt()) {
+                        if(celdasRotables.get(k-1)[2]==Consts.direccion.ARRIBA.toInt()) celda.setRotationY(180);
+                        else {
+                            celda.setRotation(270);
+                            celda.setRotationX(180);
+                        }
+                    }
+                    if(celdasRotables.get(k)[2]==Consts.direccion.IZQUIERDA.toInt()) {
+                        if (celdasRotables.get(k-1)[2]!=Consts.direccion.ABAJO.toInt()) celda.setRotation(90);
+                        celda.setRotationX(180);
+                    }
+                }
+                else {
+                    celda.setRotation(rotacion);
+
+                    // Rotar los segmentos intermedios de la serpiente
+                    if(celdasRotables.get(k)[2]==Consts.direccion.ARRIBA.toInt())
+                        celda.setRotation(Tablero.rotacion+90);
+                    if(celdasRotables.get(k)[2]==Consts.direccion.ABAJO.toInt())
+                        celda.setRotation(Tablero.rotacion+270);
+                    if(celdasRotables.get(k)[2]==Consts.direccion.DERECHA.toInt())
+                        celda.setRotation(Tablero.rotacion);
+                    if(celdasRotables.get(k)[2]==Consts.direccion.IZQUIERDA.toInt())
+                        celda.setRotation(Tablero.rotacion);
+                }
             }
         }
-        gridLayout.invalidate();
-        //contenedor.invalidate();
+    }
+
+    // Sobrecarga
+    private void rotarSegmento(ImageView celda, boolean cabeza) {
+        if(cabeza) {
+            Consts.direccion aux = (direccionColision==null)? direccionCabeza : direccionColision;
+            if(aux == Consts.direccion.ARRIBA) celda.setRotation(90);
+            if(aux == Consts.direccion.ABAJO) celda.setRotation(270);
+            if(aux == Consts.direccion.IZQUIERDA) celda.setRotation(0);
+            if(aux == Consts.direccion.DERECHA) celda.setRotation(180);
+        }
+        else {
+            if(direccionCola == Consts.direccion.ARRIBA) {
+                celda.setRotation(90);
+                celda.setRotationY(Tablero.rotacion);
+            }
+            if(direccionCola == Consts.direccion.ABAJO) {
+                celda.setRotation(270);
+                celda.setRotationY(Tablero.rotacion );
+            }
+            if(direccionCola == Consts.direccion.IZQUIERDA) celda.setRotationX(Tablero.rotacion);
+            if(direccionCola == Consts.direccion.DERECHA) {
+                celda.setRotation(180);
+                celda.setRotationX(Tablero.rotacion+180);
+            }
+        }
     }
 }

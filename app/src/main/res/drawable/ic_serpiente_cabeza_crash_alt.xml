@@ -13,13 +13,13 @@
       android:pathData="M31.9814,3.9688h21.619v44.9792h-21.619z"
       android:strokeLineJoin="round"
       android:strokeWidth="0"
-      android:fillColor="#0000ff"
+      android:fillColor="#0066ff"
       android:strokeLineCap="round"/>
   <path
       android:pathData="M21.0014,0.2646A11.9063,7.6166 90,0 0,14.2945 6.6146l-5.3019,0c-4.9078,0 -8.8586,6.176 -8.8586,13.8477L0.1339,32.4543c0,7.6717 3.9509,13.8477 8.8586,13.8477l5.2153,0a11.9063,7.6166 90,0 0,6.8229 6.6146,11.9063 7.6166,90 0,0 5.6771,-3.9688L34.1301,48.9479L34.1301,3.9688l-7.5783,0a11.9063,7.6166 90,0 0,-5.5211 -3.7042,11.9063 7.6166,90 0,0 -0.0294,0z"
       android:strokeLineJoin="round"
       android:strokeWidth="0"
-      android:fillColor="#0000ff"
+      android:fillColor="#0066ff"
       android:strokeColor="#00000000"
       android:strokeLineCap="round"/>
   <path
