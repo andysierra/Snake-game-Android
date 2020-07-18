@@ -16,6 +16,7 @@ public class Tablero <T extends ViewGroup> implements Observer
     private static final String TAG="Tablero";
     private static int rotacion = 0;
     public GridLayout gridLayout;
+    public static String hint;
     private int[][] matriz;
     private ArrayList<int[]> celdasRotables;
     private Consts.direccion direccionCabeza;
@@ -45,9 +46,10 @@ public class Tablero <T extends ViewGroup> implements Observer
     // UPDATE: Dibuja el tablero de acuerdo a la matriz en Logica
     @Override
     public void update(Observable o, Object arg) {
-        if(gridLayout.getChildCount()>0) gridLayout.removeAllViews();    // Remover viejas celdas
 
-        if(((int)((Object[])arg)[0]) == Consts.TIEMPO1) {
+        if(((int)((Object[])arg)[0]) == Consts.EJECUTE_ACTUALIZAR_TABLERO) {
+            if(gridLayout.getChildCount()>0) gridLayout.removeAllViews();    // Remover viejas celdas
+
             this.matriz             = ((int[][])((Object[])arg)[1]);
             this.celdasRotables     = ((ArrayList<int[]>)((Object[])arg)[2]);
             this.direccionCabeza    = ((Consts.direccion)((Object[])arg)[3]);
@@ -114,6 +116,33 @@ public class Tablero <T extends ViewGroup> implements Observer
                                 celda.setImageDrawable(context.getDrawable((Juego.up)?
                                         R.drawable.manzana_up_alt : R.drawable.manzana_down_alt));
                             break;
+
+                        case Consts.MANZANA_VERDE:
+                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                        R.drawable.manzana_verde_up : R.drawable.manzana_verde_down));
+                            else
+                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                        R.drawable.manzana_verde_up_alt : R.drawable.manzana_verde_down_alt));
+                            break;
+
+                        case Consts.MANZANA_DORADA:
+                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                        R.drawable.manzana_dorada_up : R.drawable.manzana_dorada_down));
+                            else
+                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                        R.drawable.manzana_dorada_up_alt : R.drawable.manzana_dorada_down_alt));
+                            break;
+
+                        case Consts.BOMBA:
+                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                        R.drawable.bomba_up : R.drawable.bomba_down));
+                            else
+                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                        R.drawable.bomba_up_alt : R.drawable.bomba_down_alt));
+                            break;
                     }
 
                     // Tamaño de celda (Obtenido desde Control.java)
@@ -122,18 +151,11 @@ public class Tablero <T extends ViewGroup> implements Observer
                 }
             }
             Tablero.rotacion += 180;
+            gridLayout.invalidate();
         }
-
-        else if(((int)((Object[])arg)[0]) == Consts.TIEMPO2) {
-
-        }
-
-        else if(((int)((Object[])arg)[0]) == Consts.TIEMPO3) {
-
-        }
-
-        gridLayout.invalidate();
     }
+
+
 
     private void rotarSegmento(int i, int j, ImageView celda) {
         for(int k=0; k<celdasRotables.size(); k++) {
@@ -184,7 +206,6 @@ public class Tablero <T extends ViewGroup> implements Observer
             }
         }
     }
-
     // Sobrecarga
     private void rotarSegmento(ImageView celda, boolean cabeza) {
         if(cabeza) {

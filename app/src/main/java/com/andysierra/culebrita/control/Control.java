@@ -4,18 +4,22 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+
+import com.andysierra.culebrita.actividades.MainActivity;
 import com.andysierra.culebrita.consts.Consts;
 import com.andysierra.culebrita.modelos.Juego;
+import com.andysierra.culebrita.modelos.Serpiente;
+import com.andysierra.culebrita.vistas.Info;
 import com.andysierra.culebrita.vistas.Tablero;
-
-import java.util.ArrayList;
 
 public class Control implements ViewTreeObserver.OnGlobalLayoutListener,    // Controlar el layout
                                 View.OnTouchListener                        // Controlar el touch
 {
     private static final String TAG="Control";
-    private Juego   juego;
-    private Tablero tablero;
+    private Tablero     tablero;
+    private Info        info;
+    private Juego       juego;
+    private Serpiente[] serpientes;
     private float   x1;
     private float   x2;
     private float   y1;
@@ -24,11 +28,25 @@ public class Control implements ViewTreeObserver.OnGlobalLayoutListener,    // C
 
 
     // CONSTRUCTOR: Inicializar los objetos
-    public Control(Juego juego, Tablero tablero) {
-        this.juego   = juego;
-        this.tablero = tablero;
+    public Control(MainActivity mainActivity, Tablero tablero, Info info, Juego juego, Serpiente... serpientes) {
+        this.tablero    = tablero;
+        this.info       = info;
+        this.serpientes = serpientes;
+        this.juego      = juego;
+
+        try {
+            if(serpientes.length<1)
+                throw new InstantiationException("Al instanciar un objeto control, debes pasar como " +
+                        "parámetro al menos una serpiente");
+        }
+        catch (InstantiationException i) {
+            Log.e(TAG, i.getMessage(), i);
+            mainActivity.salir();
+        }
 
         juego.addObserver(tablero);
+        juego.addObserver(info);
+        for(Serpiente s : serpientes) s.addObserver(info);
         tablero.contenedor.getViewTreeObserver().addOnGlobalLayoutListener(this);
         tablero.contenedor.setOnTouchListener(this);
     }

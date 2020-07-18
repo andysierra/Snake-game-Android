@@ -5,14 +5,18 @@ import android.util.Log;
 import com.andysierra.culebrita.consts.Consts;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Observable;
+import java.util.Observer;
 
-public class Serpiente
+public class Serpiente extends Observable
 {
     private static final String TAG="Serpiente";
     public Consts.direccion direccionCabeza;
     public Consts.direccion direccionCola;
     public Consts.direccion direccionCabezaColision;
     public ArrayList<int[]> cuerpo;
+    public ArrayList<Observer> observadores;
+    public boolean siguiente_nivel;
     public int longitud;
     public int cabezaI;
     public int cabezaJ;
@@ -27,18 +31,19 @@ public class Serpiente
         this.colaI = cabezaI;
         this.colaJ = cabezaJ;
         this.longitud = longitud;
-        Juego.matriz[cabezaI][cabezaJ] = Consts.SERPIENTE_CABEZA;
+        //Juego.matriz[cabezaI][cabezaJ] = Consts.SERPIENTE_CABEZA;
         this.direccionCabeza = direccionCabeza;
         this.direccionCola = direccionCabeza;
         this.direccionCabezaColision = null;
         cuerpo= new ArrayList<>();
-        agregarSegmentos(longitud);
+        observadores= new ArrayList<>();
+        siguiente_nivel = false;
     }
 
 
-    private void agregarSegmentos(int longitud) {
+    public void agregarSegmentos() {
         // Según la dirección, agrega un segmento
-        for(int k=1; k<longitud; k++) {
+        for(int k=1; k<this.longitud; k++) {
             if(cuerpo.size()==0) {
                 cuerpo.add(new int[]{cabezaI, cabezaJ+k, Consts.direccion.IZQUIERDA.toInt()});
                 colaJ++;
@@ -75,10 +80,38 @@ public class Serpiente
         Juego.matriz[colaI][colaJ] = Consts.SERPIENTE_COLA;                        // Pintar la cola
     }
 
+
+    public void reiniciarSerpiente() {
+        this.cabezaI = Consts.POSICION_INICIAL_I;
+        this.cabezaJ = Consts.POSICION_INICIAL_J;
+        this.colaI = cabezaI;
+        this.colaJ = cabezaJ;
+        this.longitud = Consts.LONGITUD_INICIAL;
+        this.direccionCabeza = Consts.ORIENTACION_INICIAL;
+        this.direccionCola = this.direccionCabeza;
+        for(int[] segmento : this.cuerpo)
+            Juego.matriz[segmento[0]][segmento[1]] =
+                    ((segmento[0]%2==0 && segmento[1]%2==0) || (segmento[0]%2!=0 && segmento[1]%2!=0))?
+                            Consts.VACIO1 : Consts.VACIO2;
+        this.cuerpo.clear();
+        this.cuerpo = new ArrayList<>();
+        this.colaI = this.cabezaI;
+        this.colaJ = this.cabezaJ;
+        this.siguiente_nivel = false;
+    }
+
+
+
     public boolean mover(Consts.direccion direccion) {
         // No permitir reversa de serpiente
         if(direccion.toInt() == (this.direccionCabeza.toInt()*(-1)))
             direccion = Consts.direccion.toDireccion(this.direccionCabeza.toInt());
+
+        // Dirección de la cabeza
+        this.direccionCabeza= direccion;
+
+        // Crecer?
+        boolean crecer = true;
 
         // Actualizar la nueva posición y evitar una colisión
         int[] anterior = new int[]{cabezaI, cabezaJ,direccion.toInt()};
@@ -91,10 +124,36 @@ public class Serpiente
         else if ( direccion == Consts.direccion.IZQUIERDA && cabezaJ > 0)
             if(!esColision(direccion)) cabezaJ--; else return false;
         else return false;  // No se puede mover
-        cuerpo.add(anterior); // Agregar la anterior posición al cuerpo
+
+// SI EL MOVIMIENTO ES VÁLIDO:
+
+        // Si come un objeto, altere el puntaje y el tamaño de la serpiente
+        int crecimiento = comioManzana();
+        if(crecimiento > 0) Juego.puntaje += crecimiento;
+        else if(crecimiento < 0) {
+            // Moche a la serpiente mientras su longitud esté entre 3 y la mitad del tablero
+            if(cuerpo.size()>2) {
+                for(int i=0; i<(crecimiento*(-1)); i++) {
+
+                    // Limpiar
+                    Juego.matriz[cuerpo.get(0)[0]][cuerpo.get(0)[1]]=
+                            ((cuerpo.get(0)[0] %2==0&& cuerpo.get(0)[1] %2==0) ||
+                                    (cuerpo.get(0)[0] %2!=0&& cuerpo.get(0)[1] %2!=0))?
+                                    Consts.VACIO1 : Consts.VACIO2;
+
+                    // Mochar
+                    cuerpo.remove(0);
+                }
+            }
+            crecer = false;
+        }
+        else if(crecimiento == 0) crecer = false;
+
+
+        // Agregar la anterior posición al cuerpo
+        cuerpo.add(anterior);
 
         // Pintar cabeza
-        this.direccionCabeza= direccion;                                   // Dirección de la cabeza
         Juego.matriz[cabezaI][cabezaJ]  = Consts.SERPIENTE_CABEZA;         // Pintar la nueva cabeza
 
         // Limpiar
@@ -102,7 +161,9 @@ public class Serpiente
                 ((cuerpo.get(0)[0] %2==0&& cuerpo.get(0)[1] %2==0) ||
                  (cuerpo.get(0)[0] %2!=0&& cuerpo.get(0)[1] %2!=0))?
                         Consts.VACIO1 : Consts.VACIO2;
-        cuerpo.remove(0); // Elimina la anterior posición de la serpiente
+
+        // Elimina la anterior posición de la serpiente
+        if(!crecer) cuerpo.remove(0);
 
         // Nueva cola
         colaI = cuerpo.get(0)[0];
@@ -122,8 +183,7 @@ public class Serpiente
 
 
 
-
-
+    // Detecta si la serpiente se colisionará consigo misma
     private boolean esColision(Consts.direccion direccion) {
         for(int[] p : cuerpo)
             if( (direccion == Consts.direccion.ARRIBA    && p[0] == cabezaI-1 && p[1] == cabezaJ)    ||
@@ -135,4 +195,69 @@ public class Serpiente
             }
         return false;
     }
+
+
+
+
+    // APARECER
+    //      manzana roja    +1 pto
+    //      manzana verde   +10 ptos
+    //      manzana dorada  (siguiente nivel)
+    //      veneno          23 segundos sin manzanas
+    //      bomba           -10 ptos
+    private int comioManzana() {
+        if(Juego.matriz[this.cabezaI][this.cabezaJ] == Consts.MANZANA) {
+            Juego.manzanasEnJuego--;
+            Juego.manzanaCounter++;
+            return 1;
+        }
+
+        else if(Juego.matriz[this.cabezaI][this.cabezaJ] == Consts.MANZANA_VERDE) {
+            Juego.manzanasEnJuego--;
+            Juego.manzanaCounter++;
+            return 10;
+        }
+
+        else if(Juego.matriz[this.cabezaI][this.cabezaJ] == Consts.MANZANA_DORADA) {
+            this.siguiente_nivel = true;
+        }
+
+        else if(Juego.matriz[this.cabezaI][this.cabezaJ] == Consts.BOMBA) {
+
+            if(cuerpo.size()<(Consts.FILAS*Consts.COLS)/2) {
+                // Si tiene puntaje, disminuya como castigo
+                if(Juego.puntaje > 10) {
+                    Juego.puntaje-=10;
+                    notifyObservers(new Object[]{
+                            Consts.EJECUTE_ACTUALIZAR_HINT,
+                            Consts.BOMBA_MALA
+                    });
+                }
+                else notifyObservers(new Object[]{
+                            Consts.EJECUTE_ACTUALIZAR_HINT,
+                            Consts.BOMBA_BUENA
+                     });
+            }
+            else if(cuerpo.size()>(Consts.FILAS*Consts.COLS)/2) {
+                // Si es muy largo o su puntaje es muy pequeño, no castigará
+                notifyObservers(new Object[]{
+                    Consts.EJECUTE_ACTUALIZAR_HINT,
+                    Consts.BOMBA_BUENA
+                });
+            }
+
+
+            return -2;
+        }
+        else if(Juego.matriz[this.cabezaI][this.cabezaJ] == Consts.VENENO) {
+            Juego.venenoEfecto = 23;  // Número primo para demora en envenenamiento
+        }
+        return 0;
+    }
+
+    @Override
+    public synchronized void addObserver(Observer o) { observadores.add(o); }
+
+    @Override
+    public void notifyObservers(Object arg) { for(Observer o : observadores) o.update(this, arg); }
 }

@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.1" />
+        app:layout_constraintGuide_percent="0.06" />
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -22,5 +22,83 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/arriba"></LinearLayout>
+        app:layout_constraintTop_toTopOf="@+id/arriba">
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imgmanzana"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        app:layout_constraintBottom_toTopOf="@+id/arriba"
+        app:layout_constraintEnd_toStartOf="@+id/txfManzanas"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/only_manzana" />
+
+    <TextView
+        android:id="@+id/txfManzanas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="0"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/arriba"
+        app:layout_constraintStart_toEndOf="@+id/imgmanzana"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txftiempo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:text="--:--"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/arriba"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imgclock"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/arriba"
+        app:layout_constraintEnd_toStartOf="@+id/txftiempo"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/clockicon" />
+
+    <ImageView
+        android:id="@+id/imghint"
+        android:layout_width="42dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        app:layout_constraintBottom_toTopOf="@+id/arriba"
+        app:layout_constraintStart_toEndOf="@+id/txfManzanas"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/txfHint"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="4dp"
+        android:inputType="textMultiLine|textNoSuggestions"
+        android:text="(ﾉ◕‿◕)ﾉ*:･ﾟ✧･ﾟ✧"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/arriba"
+        app:layout_constraintEnd_toStartOf="@+id/imgclock"
+        app:layout_constraintStart_toEndOf="@+id/imghint"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
