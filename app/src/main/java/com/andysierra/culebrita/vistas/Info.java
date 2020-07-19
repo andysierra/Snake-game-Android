@@ -1,5 +1,6 @@
 package com.andysierra.culebrita.vistas;
 
+import android.graphics.drawable.Animatable;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;

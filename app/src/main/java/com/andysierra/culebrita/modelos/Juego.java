@@ -258,13 +258,14 @@ public class Juego extends Observable
             else {
                 int[] coords = this.getCeldaVacia();
                 Juego.matriz[coords[0]][coords[1]] = Consts.MANZANA_DORADA;
+                Juego.manzanasEnJuego++;
             }
         }
 
         // SPAWN DE BOMBAS
         else if(operacion == Consts.EJECUTE_SPAWN_BOMBA) {
             if(bombasEnJuego==0) {
-                for(int i=0; i<(Consts.FILAS*Consts.COLS)/7; i++) {
+                for(int i=0; i<(Consts.FILAS*Consts.COLS)/(10- Consts.DIFICULTAD_BOMBAS); i++) {
                     int[] coords = this.getCeldaVacia();
                     Juego.matriz[coords[0]][coords[1]] = Consts.BOMBA;
                     bombasEnJuego++;

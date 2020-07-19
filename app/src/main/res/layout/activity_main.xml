@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainactivity_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#5CC338"
@@ -14,8 +15,8 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.06" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
+    <FrameLayout
+        android:id="@+id/framelayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -24,7 +25,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/arriba">
 
-    </LinearLayout>
+    </FrameLayout>
 
     <ImageView
         android:id="@+id/imgmanzana"
@@ -56,7 +57,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="24dp"
-        android:text="--:--"
+        android:text="00:00"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/arriba"
@@ -71,7 +72,7 @@
         app:layout_constraintBottom_toTopOf="@+id/arriba"
         app:layout_constraintEnd_toStartOf="@+id/txftiempo"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/clockicon" />
+        app:srcCompat="@drawable/anim_clockicon" />
 
     <ImageView
         android:id="@+id/imghint"

@@ -1,8 +1,10 @@
 package com.andysierra.culebrita.actividades;
 
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
+
 import com.andysierra.culebrita.R;
 import com.andysierra.culebrita.consts.Consts;
 import com.andysierra.culebrita.control.Control;
@@ -13,18 +15,18 @@ import java.lang.ref.WeakReference;
 public class MainActivity extends AppCompatActivity
 {
     private static final String TAG="MainActivity";
-    Tablero     tablero;
-    Info        info;
-    Serpiente   serpiente;
-    Juego       juego;
-    Control     control;
+    Tablero             tablero;
+    Info                info;
+    Serpiente           serpiente;
+    Juego               juego;
+    Control             control;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tablero     = new Tablero((LinearLayout)findViewById(R.id.linearLayout), this);
+        tablero     = new Tablero((FrameLayout)findViewById(R.id.framelayout), this);
         info        = new Info(this);
         serpiente   = new Serpiente(Consts.POSICION_INICIAL_I,
                                     Consts.POSICION_INICIAL_J,

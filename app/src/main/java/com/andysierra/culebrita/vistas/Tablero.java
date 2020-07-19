@@ -1,10 +1,17 @@
 package com.andysierra.culebrita.vistas;
 
-import android.content.Context;
+import android.graphics.Color;
+import android.util.Log;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+
 import com.andysierra.culebrita.R;
+import com.andysierra.culebrita.actividades.MainActivity;
 import com.andysierra.culebrita.consts.Consts;
 import com.andysierra.culebrita.modelos.Juego;
 import java.util.ArrayList;
@@ -23,15 +30,15 @@ public class Tablero <T extends ViewGroup> implements Observer
     private Consts.direccion direccionCola;
     private Consts.direccion direccionColision;
     public T contenedor;
-    private Context context;
+    private MainActivity mainActivity;
     public int cellSize;
 
 
     // CONSTRUCTOR: Inicializar los objetos
-    public Tablero(T contenedor, final Context context) {
+    public Tablero(T contenedor, MainActivity mainActivity) {
         this.contenedor = contenedor;
-        this.context = context;
-        gridLayout = new GridLayout(context);
+        this.mainActivity = mainActivity;
+        gridLayout = new GridLayout(this.mainActivity);
         gridLayout.setColumnCount(Consts.COLS);
         gridLayout.setRowCount(Consts.FILAS);
         matriz = null;
@@ -39,6 +46,8 @@ public class Tablero <T extends ViewGroup> implements Observer
         direccionCabeza = null;
 
         contenedor.addView(gridLayout);
+
+
     }
 
 
@@ -48,7 +57,9 @@ public class Tablero <T extends ViewGroup> implements Observer
     public void update(Observable o, Object arg) {
 
         if(((int)((Object[])arg)[0]) == Consts.EJECUTE_ACTUALIZAR_TABLERO) {
-            if(gridLayout.getChildCount()>0) gridLayout.removeAllViews();    // Remover viejas celdas
+            // Remover celdas viejas
+            if(gridLayout.getChildCount()>0) gridLayout.removeAllViews();
+
 
             this.matriz             = ((int[][])((Object[])arg)[1]);
             this.celdasRotables     = ((ArrayList<int[]>)((Object[])arg)[2]);
@@ -63,84 +74,84 @@ public class Tablero <T extends ViewGroup> implements Observer
                 for(int j=0; j<Consts.COLS; j++) {
 
                     // Poner una Imageview en el gridLayout
-                    celda = new ImageView(context);
+                    celda = new ImageView(mainActivity);
                     gridLayout.addView(celda);
 
                     // Dibujar celda
                     switch (matriz[i][j]) {
                         case Consts.VACIO1:
-                            celda.setImageDrawable(context.getDrawable(R.drawable.ic_greenie));
+                            celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_greenie));
                             break;
 
                         case Consts.VACIO2:
-                            celda.setImageDrawable(context.getDrawable(R.drawable.ic_greenie_alt));
+                            celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_greenie_alt));
                             break;
 
                         case Consts.SERPIENTE:
                             if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente));
+                                celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente));
                             else
-                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_alt));
+                                celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_alt));
                             this.rotarSegmento(i, j, celda);
                             break;
 
                         case Consts.SERPIENTE_CABEZA:
                             if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cabeza));
+                                celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cabeza));
                             else
-                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cabeza_alt));
+                                celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cabeza_alt));
                             this.rotarSegmento(celda, true);
                             break;
 
                         case Consts.SERPIENTE_COLA:
                             if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cola));
+                                celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cola));
                             else
-                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cola_alt));
+                                celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cola_alt));
                             this.rotarSegmento(celda, false);
                             break;
 
                         case Consts.SERPIENTE_CABEZA_CRASH:
                             if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cabeza_crash));
+                                celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cabeza_crash));
                             else
-                                celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_cabeza_crash_alt));
+                                celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cabeza_crash_alt));
                             this.rotarSegmento(celda, true);
                             break;
 
                         case Consts.MANZANA:
                             if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
                                         R.drawable.manzana_up : R.drawable.manzana_down));
                             else
-                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
                                         R.drawable.manzana_up_alt : R.drawable.manzana_down_alt));
                             break;
 
                         case Consts.MANZANA_VERDE:
                             if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
                                         R.drawable.manzana_verde_up : R.drawable.manzana_verde_down));
                             else
-                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
                                         R.drawable.manzana_verde_up_alt : R.drawable.manzana_verde_down_alt));
                             break;
 
                         case Consts.MANZANA_DORADA:
                             if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
                                         R.drawable.manzana_dorada_up : R.drawable.manzana_dorada_down));
                             else
-                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
                                         R.drawable.manzana_dorada_up_alt : R.drawable.manzana_dorada_down_alt));
                             break;
 
                         case Consts.BOMBA:
                             if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
                                         R.drawable.bomba_up : R.drawable.bomba_down));
                             else
-                                celda.setImageDrawable(context.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
                                         R.drawable.bomba_up_alt : R.drawable.bomba_down_alt));
                             break;
                     }
@@ -165,9 +176,9 @@ public class Tablero <T extends ViewGroup> implements Observer
                 // ROTACIÓN DE LA CURVA
                 if(k>0 && celdasRotables.get(k)[2] != celdasRotables.get(k-1)[2]) {
                     if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                        celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_curva));
+                        celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_curva));
                     else
-                        celda.setImageDrawable(context.getDrawable(R.drawable.ic_serpiente_curva_alt));
+                        celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_curva_alt));
 
                     // Rotar los segmentos intermedios de la serpiente
                     if(celdasRotables.get(k)[2]==Consts.direccion.ARRIBA.toInt()) {

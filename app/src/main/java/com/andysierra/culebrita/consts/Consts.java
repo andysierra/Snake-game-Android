@@ -5,7 +5,8 @@ public class Consts
     // Tablero y Lógica
     public static final int FILAS               = 15;
     public static final int COLS                = 10;
-    public static final int SIGUIENTE_NIVEL     = 100;
+    public static final int SIGUIENTE_NIVEL     = 200; // default 200
+    public static final int DIFICULTAD_BOMBAS   = 3;  // default 3
 
     // Medidas de tiempo y FPS
     public static final int TIEMPO_SERPIENTE            = 300;          // Velocidad de serpiente
@@ -41,8 +42,8 @@ public class Consts
     public static final Consts.direccion ORIENTACION_INICIAL    = direccion.IZQUIERDA;
 
     // Mensajes
-    public static final String BOMBA_BUENA      = "Bomba:\nNo te afectará mientras crezcas :)";
-    public static final String BOMBA_MALA       = "Bomba:\n-10 puntos";
+    public static final String BOMBA_BUENA      = "Bomba: No te quitará puntos por ahora :)";
+    public static final String BOMBA_MALA       = "Bomba: -10 puntos";
     public static final String GAME_OVER        = "Game Over ¯\\_(ツ)_/¯";
 
     // Objetos del juego
