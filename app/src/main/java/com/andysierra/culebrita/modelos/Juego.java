@@ -31,6 +31,8 @@ public class Juego extends Observable
     private Thread loop;
     public Serpiente[] serpientes;
     public Consts.direccion direccion;
+    long movimientoSerpiente;    // Velocidad de serpiente
+    long tiempo;                 // Segundero
 
 
     // CONSTRUCTOR: Inicializar los objetos
@@ -73,7 +75,7 @@ public class Juego extends Observable
         Juego.bombasEnJuego = 0;
         Juego.manzanaCounter = 0;
         Juego.venenoEfecto = 1;
-        segundoRandom = ((int)(Math.random()*60));
+        segundoRandom = ((int)(Math.random()*50+10));
         Log.println(Log.ASSERT, TAG, "iniciarJuego: segundo random inicial es: "+segundoRandom);
 
         // reiniciar dirección
@@ -117,9 +119,6 @@ public class Juego extends Observable
         if(loop == null) {
             loop = new Thread(new Runnable()    // Hilo del loop
             {
-                long movimientoSerpiente;    // Velocidad de serpiente
-                long tiempo;                 // Segundero
-
                 @Override
                 public void run() {
                     movimientoSerpiente = System.currentTimeMillis();    // Iniciar fps
@@ -138,7 +137,8 @@ public class Juego extends Observable
                             // Obtenga el tiempo transcurrido (requerimiento)
                             if(System.currentTimeMillis()- tiempo > Consts.SEGUNDO) {
                                 ejecutar(Consts.EJECUTE_TEMPORIZADOR);              // Actualizar Tiempo
-                                ejecutar(Consts.EJECUTE_ACTUALIZAR_TXFTIEMPO);
+                                ejecutar(Consts.EJECUTE_ACTUALIZAR_TXFTIEMPO);      // Actualizar reloj
+                                ejecutar(Consts.EJECUTE_ACTUALIZAR_MENSAJE);
                                 if(Juego.manzanasEnJuego<1)
                                     ejecutar(Consts.EJECUTE_SPAWN_MANZANA);
                                 if(segundoRandom == segundos)
@@ -272,8 +272,6 @@ public class Juego extends Observable
                 }
             }
 
-            Log.println(Log.ASSERT, TAG, "ejecutar: BOMBAS EN JUEGO "+bombasEnJuego);
-
             new Timer().schedule(new TimerTask()
             {
                 @Override
@@ -286,6 +284,24 @@ public class Juego extends Observable
                                         Consts.VACIO1 : Consts.VACIO2;
                 }
             }, 5000);
+        }
+
+        // ACTUALIZAR MENSAJE
+        else if(operacion == Consts.EJECUTE_ACTUALIZAR_MENSAJE) {
+
+            // Si estoy a punto de soltar bombas, muestre el mensaje
+            if((segundoRandom-segundos)<4 && (segundoRandom-segundos)>-1) {
+                ((MainActivity)weakActivity.get()).runOnUiThread(new Runnable()
+                {
+                    @Override
+                    public void run() {
+                        notifyObservers(new Object[]{
+                                Consts.EJECUTE_ACTUALIZAR_MENSAJE,
+                                (segundoRandom-segundos)
+                        });
+                    }
+                });
+            }
         }
     }
 

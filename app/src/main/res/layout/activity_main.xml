@@ -72,7 +72,7 @@
         app:layout_constraintBottom_toTopOf="@+id/arriba"
         app:layout_constraintEnd_toStartOf="@+id/txftiempo"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/anim_clockicon" />
+        app:srcCompat="@drawable/clockicon" />
 
     <ImageView
         android:id="@+id/imghint"

@@ -9,7 +9,7 @@ public class Consts
     public static final int DIFICULTAD_BOMBAS   = 3;  // default 3
 
     // Medidas de tiempo y FPS
-    public static final int TIEMPO_SERPIENTE            = 300;          // Velocidad de serpiente
+    public static final int TIEMPO_SERPIENTE            = 350;          // Velocidad de serpiente, defaults 150, 250, 350
     public static final int SEGUNDO                     = 1000;         // segundero
     public static final int TIEMPO_MANZANA              = 1000;         // aparición de manzanas
 
@@ -17,9 +17,10 @@ public class Consts
     public static final int EJECUTE_ACTUALIZAR_PUNTAJE      = 2000;         // id puntaje
     public static final int EJECUTE_ACTUALIZAR_TXFTIEMPO    = 3000;         // id reloj
     public static final int EJECUTE_ACTUALIZAR_HINT         = 4000;         // id hint
-    public static final int EJECUTE_TEMPORIZADOR            = 5000;         // id temporizador
-    public static final int EJECUTE_SPAWN_MANZANA           = 6000;         // id spawn manzanas
-    public static final int EJECUTE_SPAWN_BOMBA             = 7000;         // id spawn bomba
+    public static final int EJECUTE_ACTUALIZAR_MENSAJE      = 5000;         // id mensaje
+    public static final int EJECUTE_TEMPORIZADOR            = 6000;         // id temporizador
+    public static final int EJECUTE_SPAWN_MANZANA           = 7000;         // id spawn manzanas
+    public static final int EJECUTE_SPAWN_BOMBA             = 8000;         // id spawn bomba
 
 
     // Serpiente

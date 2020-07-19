@@ -1,11 +1,15 @@
 package com.andysierra.culebrita.vistas;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
@@ -23,6 +27,8 @@ public class Tablero <T extends ViewGroup> implements Observer
     private static final String TAG="Tablero";
     private static int rotacion = 0;
     public GridLayout gridLayout;
+    public LinearLayout layoutMensajes;
+    public TextView mensaje;
     public static String hint;
     private int[][] matriz;
     private ArrayList<int[]> celdasRotables;
@@ -36,18 +42,28 @@ public class Tablero <T extends ViewGroup> implements Observer
 
     // CONSTRUCTOR: Inicializar los objetos
     public Tablero(T contenedor, MainActivity mainActivity) {
-        this.contenedor = contenedor;
-        this.mainActivity = mainActivity;
-        gridLayout = new GridLayout(this.mainActivity);
+        this.contenedor     = contenedor;
+        this.mainActivity   = mainActivity;
+        gridLayout          = new GridLayout(this.mainActivity);
+        layoutMensajes      = new LinearLayout(mainActivity);
+        mensaje             = new TextView(mainActivity);
+        matriz              = null;
+        celdasRotables      = null;
+        direccionCabeza     = null;
+
         gridLayout.setColumnCount(Consts.COLS);
         gridLayout.setRowCount(Consts.FILAS);
-        matriz = null;
-        celdasRotables = null;
-        direccionCabeza = null;
+        layoutMensajes.setBackgroundColor(Color.TRANSPARENT);
+        layoutMensajes.setGravity(Gravity.CENTER);
+        mensaje.setText("");
+        mensaje.setTextSize(40);
+        mensaje.setTypeface(null, Typeface.BOLD);
+        mensaje.setTextColor(Color.WHITE);
 
         contenedor.addView(gridLayout);
-
-
+        contenedor.addView(layoutMensajes);
+        layoutMensajes.addView(mensaje);
+        layoutMensajes.getLayoutParams().height = 1000;
     }
 
 
@@ -164,6 +180,11 @@ public class Tablero <T extends ViewGroup> implements Observer
             Tablero.rotacion += 180;
             gridLayout.invalidate();
         }
+
+        else if(((int)((Object[])arg)[0]) == Consts.EJECUTE_ACTUALIZAR_MENSAJE) {
+            mensaje.setText((((int)((Object[])arg)[1])>0)?
+                    "Bombas en "+((int)((Object[])arg)[1])+"..." : "");
+        }
     }
 
 
@@ -201,6 +222,7 @@ public class Tablero <T extends ViewGroup> implements Observer
                         celda.setRotationX(180);
                     }
                 }
+
                 else {
                     celda.setRotation(rotacion);
 
