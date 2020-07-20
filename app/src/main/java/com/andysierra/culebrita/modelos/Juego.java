@@ -1,7 +1,6 @@
 package com.andysierra.culebrita.modelos;
 
 import android.util.Log;
-
 import com.andysierra.culebrita.actividades.MainActivity;
 import com.andysierra.culebrita.consts.Consts;
 import java.lang.ref.WeakReference;
@@ -18,7 +17,6 @@ public class Juego extends Observable
     WeakReference<MainActivity> weakActivity;
     public static int[][] matriz;
     private int segundoRandom;
-    public static boolean up;
     public static int   puntaje,
                         segundos,
                         minutos,
@@ -49,15 +47,15 @@ public class Juego extends Observable
             ((MainActivity)weakActivity.get()).salir();
         }
         observadores = new ArrayList<>();   // Mis observadores
+        this.enPausa = true;
     }
 
 
 
 
     // CONSTRUCTOR: Inicializar los objetos
-    public void iniciarJuego() {
+    public void prepararJuego() {
         Juego.matriz = new int[Consts.FILAS][Consts.COLS];
-        Juego.up = true;
 
         // iniciar backgrund ajedrezao
 
@@ -76,7 +74,6 @@ public class Juego extends Observable
         Juego.manzanaCounter = 0;
         Juego.venenoEfecto = 1;
         segundoRandom = ((int)(Math.random()*50+10));
-        Log.println(Log.ASSERT, TAG, "iniciarJuego: segundo random inicial es: "+segundoRandom);
 
         // reiniciar dirección
         this.direccion = Consts.direccion.IZQUIERDA;
@@ -96,6 +93,8 @@ public class Juego extends Observable
 
 
 
+
+    // Obtener una celda vacía para poner manzanas
     private int[] getCeldaVacia() {
         int i = (int)(Math.random()*Consts.FILAS);
         int j = (int)(Math.random()*Consts.COLS);
@@ -111,11 +110,10 @@ public class Juego extends Observable
 
 
 
-
     // Loop principal del juego
     private void looper() {
         esActivo = true;
-        enPausa  = false;
+        enPausa  = true;
         if(loop == null) {
             loop = new Thread(new Runnable()    // Hilo del loop
             {
@@ -125,24 +123,30 @@ public class Juego extends Observable
                     tiempo              = System.currentTimeMillis();    // Iniciar el tiempo
 
                     while (esActivo) {                      // Mientras el juego esté activo
-                        if(!enPausa) {                      // Si el juego no está en Pausa
 
-                            // Ejecute a una velocidad tiempo  (Movimiento serpiente)
-                            if(System.currentTimeMillis()- movimientoSerpiente > Consts.TIEMPO_SERPIENTE) {
-                                ejecutar(Consts.EJECUTE_ACTUALIZAR_TABLERO);            // refrescar pantalla
-                                ejecutar(Consts.EJECUTE_ACTUALIZAR_PUNTAJE);
-                                movimientoSerpiente= System.currentTimeMillis(); // actualizar el tiempo
-                            }
+
+                        // Ejecute a una velocidad tiempo  (Movimiento serpiente)
+                        // SI ESTÁ EN PAUSA, LA SERPIENTE SE ANIMA PERO NO SE MUEVE DE SU POSICIÓN
+                        if(System.currentTimeMillis()- movimientoSerpiente > Consts.TIEMPO_SERPIENTE) {
+                            ejecutar(Consts.EJECUTE_UP);                        // Tic/Tac de animación
+                            ejecutar(Consts.EJECUTE_ACTUALIZAR_TABLERO);        // refrescar pantalla
+                            ejecutar(Consts.EJECUTE_ACTUALIZAR_PUNTAJE);        // Actualizar puntaje
+                            movimientoSerpiente= System.currentTimeMillis();
+                        }
+
+
+                        if(!enPausa) {                      // Si el juego no está en Pausa
 
                             // Obtenga el tiempo transcurrido (requerimiento)
                             if(System.currentTimeMillis()- tiempo > Consts.SEGUNDO) {
-                                ejecutar(Consts.EJECUTE_TEMPORIZADOR);              // Actualizar Tiempo
+                                if(!enPausa)
+                                    ejecutar(Consts.EJECUTE_TEMPORIZADOR);          // Actualizar Tiempo
                                 ejecutar(Consts.EJECUTE_ACTUALIZAR_TXFTIEMPO);      // Actualizar reloj
-                                ejecutar(Consts.EJECUTE_ACTUALIZAR_MENSAJE);
+                                ejecutar(Consts.EJECUTE_ACTUALIZAR_MENSAJE);        // Actualizo mensajes
                                 if(Juego.manzanasEnJuego<1)
-                                    ejecutar(Consts.EJECUTE_SPAWN_MANZANA);
+                                    ejecutar(Consts.EJECUTE_SPAWN_MANZANA);         // Spawnear manzanas
                                 if(segundoRandom == segundos)
-                                    ejecutar(Consts.EJECUTE_SPAWN_BOMBA);
+                                    ejecutar(Consts.EJECUTE_SPAWN_BOMBA);           // Spawnear bombas
                                 tiempo= System.currentTimeMillis();
                             }
                         }
@@ -158,10 +162,21 @@ public class Juego extends Observable
 
     private synchronized void ejecutar(int operacion) {
 
+        // EJECUTAR TIC TAC DE ANIMACIÓN
+        if(operacion == Consts.EJECUTE_UP) {
+            ((MainActivity)weakActivity.get()).runOnUiThread(new Runnable()
+            {
+                @Override
+                public void run() {
+                    notifyObservers(new Object[]{
+                            Consts.EJECUTE_UP
+                    });
+                }
+            });
+        }
+
         // EJECUTAR MOVIMIENTO DE SERPIENTE
         if(operacion == Consts.EJECUTE_ACTUALIZAR_TABLERO) {
-            Juego.up = !Juego.up;
-
             ((MainActivity)weakActivity.get()).runOnUiThread(new Runnable()
             {
                 @Override
@@ -169,18 +184,30 @@ public class Juego extends Observable
 
                     // Si la cabeza no se mueve, muestre que se estrelló y pause el juego,
                     // o sino siga actualizando el tablero.
-                    if(!serpientes[0].mover(direccion)) {
-                        Juego.matriz[serpientes[0].cabezaI][serpientes[0].cabezaJ] =
-                                Consts.SERPIENTE_CABEZA_CRASH;
-                        enPausa = true;
-                        notifyObservers(new Object[]{
-                            Consts.EJECUTE_ACTUALIZAR_HINT,
-                            Consts.GAME_OVER
-                        });
-                    }
+
+                    if(!enPausa)
+                        if(!serpientes[0].mover(direccion)) {
+                            Juego.matriz[serpientes[0].cabezaI][serpientes[0].cabezaJ] =
+                                    Consts.SERPIENTE_CABEZA_CRASH;
+                            enPausa = true;
+                            notifyObservers(new Object[]{
+                                Consts.EJECUTE_ACTUALIZAR_HINT,
+                                Consts.GAME_OVER
+                            });
+                            notifyObservers(new Object[]{
+                                Consts.EJECUTE_ACTUALIZAR_MENSAJE,
+                                "GAME OVER",
+                                true
+                            });
+                            notifyObservers(new Object[]{
+                                    Consts.EJECUTE_ACTUALIZAR_TXFTIEMPO,
+                                    "00:00"
+                            });
+                            segundos = 0;
+                        }
 
                     if(serpientes[0].siguiente_nivel) {
-                        iniciarJuego();
+                        prepararJuego();
                     }
 
                     notifyObservers(new Object[]{
@@ -215,7 +242,6 @@ public class Juego extends Observable
                 minutos++;
                 segundos=0;
                 segundoRandom = ((int)(Math.random()*60));
-                Log.println(Log.ASSERT, TAG, "ejecutar: segundo random es: "+segundoRandom);
             }
             if(minutos>59) {
                 horas++;
@@ -290,14 +316,14 @@ public class Juego extends Observable
         else if(operacion == Consts.EJECUTE_ACTUALIZAR_MENSAJE) {
 
             // Si estoy a punto de soltar bombas, muestre el mensaje
-            if((segundoRandom-segundos)<4 && (segundoRandom-segundos)>-1) {
+            if((segundoRandom-segundos)==4) {
                 ((MainActivity)weakActivity.get()).runOnUiThread(new Runnable()
                 {
                     @Override
                     public void run() {
                         notifyObservers(new Object[]{
                                 Consts.EJECUTE_ACTUALIZAR_MENSAJE,
-                                (segundoRandom-segundos)
+                                Consts.MSG_SPAWN_BOMBA
                         });
                     }
                 });

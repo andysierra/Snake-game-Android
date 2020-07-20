@@ -88,6 +88,7 @@ public class Serpiente extends Observable
         this.colaJ = cabezaJ;
         this.longitud = Consts.LONGITUD_INICIAL;
         this.direccionCabeza = Consts.ORIENTACION_INICIAL;
+        this.direccionCabezaColision = null;
         this.direccionCola = this.direccionCabeza;
         for(int[] segmento : this.cuerpo)
             Juego.matriz[segmento[0]][segmento[1]] =

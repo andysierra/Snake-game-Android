@@ -2,25 +2,24 @@ package com.andysierra.culebrita.vistas;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
-
 import com.andysierra.culebrita.R;
 import com.andysierra.culebrita.actividades.MainActivity;
 import com.andysierra.culebrita.consts.Consts;
-import com.andysierra.culebrita.modelos.Juego;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Tablero <T extends ViewGroup> implements Observer
 {
@@ -29,12 +28,12 @@ public class Tablero <T extends ViewGroup> implements Observer
     public GridLayout gridLayout;
     public LinearLayout layoutMensajes;
     public TextView mensaje;
+    public Button btnReiniciar, btnSalir;
     public static String hint;
     private int[][] matriz;
     private ArrayList<int[]> celdasRotables;
-    private Consts.direccion direccionCabeza;
-    private Consts.direccion direccionCola;
-    private Consts.direccion direccionColision;
+    private Consts.direccion direccionCabeza, direccionColision, direccionCola;
+    private boolean up;
     public T contenedor;
     private MainActivity mainActivity;
     public int cellSize;
@@ -42,29 +41,61 @@ public class Tablero <T extends ViewGroup> implements Observer
 
     // CONSTRUCTOR: Inicializar los objetos
     public Tablero(T contenedor, MainActivity mainActivity) {
+        this.up             = true;
         this.contenedor     = contenedor;
         this.mainActivity   = mainActivity;
         gridLayout          = new GridLayout(this.mainActivity);
         layoutMensajes      = new LinearLayout(mainActivity);
         mensaje             = new TextView(mainActivity);
+        btnReiniciar        = new Button(mainActivity);
+        btnSalir            = new Button(mainActivity);
         matriz              = null;
         celdasRotables      = null;
         direccionCabeza     = null;
+        this.preparar();
+    }
 
+
+
+
+    // PREPARA LOS ELEMENTOS DEL TABLERO
+    private void preparar() {
         gridLayout.setColumnCount(Consts.COLS);
         gridLayout.setRowCount(Consts.FILAS);
         layoutMensajes.setBackgroundColor(Color.TRANSPARENT);
         layoutMensajes.setGravity(Gravity.CENTER);
+        layoutMensajes.setOrientation(LinearLayout.VERTICAL);
         mensaje.setText("");
+        mensaje.setInputType(InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         mensaje.setTextSize(40);
+        mensaje.setGravity(Gravity.CENTER);
         mensaje.setTypeface(null, Typeface.BOLD);
         mensaje.setTextColor(Color.WHITE);
+        btnReiniciar.setText("Jugar de nuevo");
+        btnReiniciar.setVisibility(View.INVISIBLE);
+        btnReiniciar.setTag("btnReiniciar");
+        btnSalir.setTag("btnSalir");
+        btnSalir.setVisibility(View.INVISIBLE);
+        btnSalir.setText("Salir");
 
         contenedor.addView(gridLayout);
         contenedor.addView(layoutMensajes);
         layoutMensajes.addView(mensaje);
+        layoutMensajes.addView(btnReiniciar);
+        layoutMensajes.addView(btnSalir);
         layoutMensajes.getLayoutParams().height = 1000;
     }
+
+
+
+
+    // Control tendrá los listeners
+    public void setOnClickListener(View.OnClickListener control) {
+        this.btnReiniciar.setOnClickListener(control);
+        this.btnSalir.setOnClickListener(control);
+    }
+
+
 
 
 
@@ -94,6 +125,7 @@ public class Tablero <T extends ViewGroup> implements Observer
                     gridLayout.addView(celda);
 
                     // Dibujar celda
+                    boolean b=(i % 2 == 0 && j % 2 == 0) || (i % 2 != 0 && j % 2 != 0);
                     switch (matriz[i][j]) {
                         case Consts.VACIO1:
                             celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_greenie));
@@ -104,7 +136,7 @@ public class Tablero <T extends ViewGroup> implements Observer
                             break;
 
                         case Consts.SERPIENTE:
-                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                            if(b)
                                 celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente));
                             else
                                 celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_alt));
@@ -112,7 +144,7 @@ public class Tablero <T extends ViewGroup> implements Observer
                             break;
 
                         case Consts.SERPIENTE_CABEZA:
-                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                            if(b)
                                 celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cabeza));
                             else
                                 celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cabeza_alt));
@@ -120,7 +152,7 @@ public class Tablero <T extends ViewGroup> implements Observer
                             break;
 
                         case Consts.SERPIENTE_COLA:
-                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                            if(b)
                                 celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cola));
                             else
                                 celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cola_alt));
@@ -128,7 +160,7 @@ public class Tablero <T extends ViewGroup> implements Observer
                             break;
 
                         case Consts.SERPIENTE_CABEZA_CRASH:
-                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
+                            if(b)
                                 celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cabeza_crash));
                             else
                                 celda.setImageDrawable(mainActivity.getDrawable(R.drawable.ic_serpiente_cabeza_crash_alt));
@@ -136,38 +168,38 @@ public class Tablero <T extends ViewGroup> implements Observer
                             break;
 
                         case Consts.MANZANA:
-                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
+                            if(b)
+                                celda.setImageDrawable(mainActivity.getDrawable((this.up)?
                                         R.drawable.manzana_up : R.drawable.manzana_down));
                             else
-                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((this.up)?
                                         R.drawable.manzana_up_alt : R.drawable.manzana_down_alt));
                             break;
 
                         case Consts.MANZANA_VERDE:
-                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
+                            if(b)
+                                celda.setImageDrawable(mainActivity.getDrawable((this.up)?
                                         R.drawable.manzana_verde_up : R.drawable.manzana_verde_down));
                             else
-                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((this.up)?
                                         R.drawable.manzana_verde_up_alt : R.drawable.manzana_verde_down_alt));
                             break;
 
                         case Consts.MANZANA_DORADA:
-                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
+                            if(b)
+                                celda.setImageDrawable(mainActivity.getDrawable((this.up)?
                                         R.drawable.manzana_dorada_up : R.drawable.manzana_dorada_down));
                             else
-                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((this.up)?
                                         R.drawable.manzana_dorada_up_alt : R.drawable.manzana_dorada_down_alt));
                             break;
 
                         case Consts.BOMBA:
-                            if((i%2==0 && j%2==0) || (i%2!=0 && j%2!=0))
-                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
+                            if(b)
+                                celda.setImageDrawable(mainActivity.getDrawable((this.up)?
                                         R.drawable.bomba_up : R.drawable.bomba_down));
                             else
-                                celda.setImageDrawable(mainActivity.getDrawable((Juego.up)?
+                                celda.setImageDrawable(mainActivity.getDrawable((this.up)?
                                         R.drawable.bomba_up_alt : R.drawable.bomba_down_alt));
                             break;
                     }
@@ -182,9 +214,34 @@ public class Tablero <T extends ViewGroup> implements Observer
         }
 
         else if(((int)((Object[])arg)[0]) == Consts.EJECUTE_ACTUALIZAR_MENSAJE) {
-            mensaje.setText((((int)((Object[])arg)[1])>0)?
-                    "Bombas en "+((int)((Object[])arg)[1])+"..." : "");
+
+            if(((int)((Object[])arg)[1]) == Consts.MSG_SPAWN_BOMBA) {
+                final Timer conteo = new Timer();
+
+                class Msg{
+                    public int i;
+                    public Msg(int i) {
+                        this.i = i;
+                    }
+                }
+                final Msg segundos = new Msg(4);
+
+                conteo.schedule(new TimerTask()
+                {
+                    @Override
+                    public void run() {
+                        segundos.i--;
+                        mensaje.setText("Bombas en "+segundos.i+"...");
+                        if(segundos.i==0) {
+                            conteo.cancel();
+                            mensaje.setText("");
+                        }
+                    }
+                }, 1000,1000);
+            }
         }
+
+        else if(((int)((Object[])arg)[0]) == Consts.EJECUTE_UP) this.up = !this.up;
     }
 
 

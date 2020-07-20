@@ -13,14 +13,15 @@ public class Consts
     public static final int SEGUNDO                     = 1000;         // segundero
     public static final int TIEMPO_MANZANA              = 1000;         // aparición de manzanas
 
-    public static final int EJECUTE_ACTUALIZAR_TABLERO      = 1000;         // id serpiente
-    public static final int EJECUTE_ACTUALIZAR_PUNTAJE      = 2000;         // id puntaje
-    public static final int EJECUTE_ACTUALIZAR_TXFTIEMPO    = 3000;         // id reloj
-    public static final int EJECUTE_ACTUALIZAR_HINT         = 4000;         // id hint
-    public static final int EJECUTE_ACTUALIZAR_MENSAJE      = 5000;         // id mensaje
-    public static final int EJECUTE_TEMPORIZADOR            = 6000;         // id temporizador
-    public static final int EJECUTE_SPAWN_MANZANA           = 7000;         // id spawn manzanas
-    public static final int EJECUTE_SPAWN_BOMBA             = 8000;         // id spawn bomba
+    public static final int EJECUTE_ACTUALIZAR_TABLERO      = 1001;         // id serpiente
+    public static final int EJECUTE_ACTUALIZAR_PUNTAJE      = 1002;         // id puntaje
+    public static final int EJECUTE_ACTUALIZAR_TXFTIEMPO    = 1003;         // id reloj
+    public static final int EJECUTE_ACTUALIZAR_HINT         = 1004;         // id hint
+    public static final int EJECUTE_ACTUALIZAR_MENSAJE      = 1005;         // id mensaje
+    public static final int EJECUTE_TEMPORIZADOR            = 1006;         // id temporizador
+    public static final int EJECUTE_SPAWN_MANZANA           = 1007;         // id spawn manzanas
+    public static final int EJECUTE_SPAWN_BOMBA             = 1008;         // id spawn bomba
+    public static final int EJECUTE_UP                      = 1009;         // id up
 
 
     // Serpiente
@@ -42,10 +43,13 @@ public class Consts
     public static final int LONGITUD_INICIAL                    = 4;
     public static final Consts.direccion ORIENTACION_INICIAL    = direccion.IZQUIERDA;
 
-    // Mensajes
+    // Hints
     public static final String BOMBA_BUENA      = "Bomba: No te quitará puntos por ahora :)";
     public static final String BOMBA_MALA       = "Bomba: -10 puntos";
     public static final String GAME_OVER        = "Game Over ¯\\_(ツ)_/¯";
+
+    // Mensajes
+    public static final int MSG_SPAWN_BOMBA    = 2001;
 
     // Objetos del juego
     public static final int VACIO1                      = 10;

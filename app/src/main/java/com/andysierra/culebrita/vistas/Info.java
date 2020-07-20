@@ -69,7 +69,7 @@ public class Info implements Observer
                         }
                     });
                 }
-            }, 5000);
+            }, 7000);
         }
     }
 }
